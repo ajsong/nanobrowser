@@ -6,9 +6,6 @@
 
 [![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE)
 
-[![Watch on GitHub][github-watch-badge]][github-watch]
-[![Star on GitHub][github-star-badge]][github-star]
-
 ## Features
 
 - **Custom window.navigator.platform**
