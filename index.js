@@ -495,6 +495,7 @@ if(!gotTheLock){
 					updateNotAva: '当前为最新版本'
 				};
 				autoUpdater.autoDownload = false;
+				if(!app.isPackaged)autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml');
 				autoUpdater.setFeedURL({
 					provider: 'generic',
 					url: feedUrl
