@@ -4,6 +4,11 @@
 
 *A custom platform/userAgent mini web browser desktop app on macOS, Windows and Linux. Built with [Electron](https://github.com/atom/electron).*
 
+[![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE)
+
+[![Watch on GitHub][github-watch-badge]][github-watch]
+[![Star on GitHub][github-star-badge]][github-star]
+
 ## Features
 
 - **Custom window.navigator.platform**
@@ -28,4 +33,4 @@ npm install && npm start
 
 #### License [MIT](LICENSE)
 
-*Nanobrowser* is released by this open source project.
+*Nanobrowser* is published under the MIT license. See `LICENSE` for details.
