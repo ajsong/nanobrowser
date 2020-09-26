@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=320,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0,user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="email=no">
+<meta name="format-detection" content="address=no">
+<title>TRAY</title>
+<style>
+@import url("../base.css");
+
+body{margin:0; background:#e8ebee; user-select:none; padding:4px 0; font-size:14px; transition:all 0.3s ease-out;}
+li{height:26px; line-height:20px; padding:3px 15px; box-sizing:border-box;}
+li span{display:block; float:left;}
+li label{float:right;}
+li font{float:right; color:#999;}
+li.separator{padding:4px 0; height:10px !important;}
+li.separator:after{content:""; display:block; background:#d8dcdc; height:2px; transition:all 0.3s ease-out;}
+li[class]:not(.separator){height:19px; line-height:19px; padding:0 15px;}
+li[class]:not(.separator):hover{background:#4890f7; color:#fff;}
+
+.checkbox-app > *{width:32px; height:20px; border-radius:20px;}
+.checkbox-app > *:before{border-radius:18px;}
+.checkbox-app > *:after{width:18px;}
+.checkbox-app input:checked + *:after{-webkit-transform:translate3d(12px,0,0); transform:translate3d(12px,0,0);}
+
+.nonMac{font-size:12px;}
+.nonMac li:nth-last-child(3){height:19px; line-height:19px; padding:0 15px;}
+.nonMac li:nth-last-child(3):hover{background:#4890f7; color:#fff;}
+
+@media (prefers-color-scheme: dark) {
+body{background:#3b393e; color:#fff;}
+li.separator:after{background:#5b5d62;}
+.checkbox-app > *{background:#666;}
+.checkbox-app > *:before{background:#242424;}
+.checkbox-app > *:after{background:#ccc;}
+}
+</style>
+</head>
+
+<body>
+<ul>
+	<li><label class="checkbox-app"><input type="checkbox" class="openLogin" /><b></b></label><span>开机自启</span></li>
+	<li><label class="checkbox-app"><input type="checkbox" class="alwaysTop" /><b></b></label><span>窗口置顶</span></li>
+	<li><label class="checkbox-app"><input type="checkbox" class="dark" /><b></b></label><span>暗黑模式</span></li>
+	<li class="separator"></li>
+	<li class="devTools"><font>Ctrl+I</font><span>开发者工具</span></li>
+	<li class="html"><font>Ctrl+U</font><span>复制HTML代码</span></li>
+	<li class="separator"></li>
+	<li class="preferences"><font>Ctrl+,</font><span>偏好设置</span></li>
+	<li class="update"><span>检查更新</span></li>
+	<li class="quit"><span>退出</span></li>
+</ul>
+</body>
+</html>
+<script>
+const { remote, ipcRenderer } = require('electron');
+const Store = require('electron-store');
+const $ = jQuery = require('../../assets/jquery-3.4.1.min');
+let store = new Store();
+let isMac = process.platform === 'darwin';
+
+if(!isMac)$('body').addClass('nonMac');
+
+let openLogin = $('.openLogin').on('click', function(){
+	ipcRenderer.send('openLogin', this.checked);
+	if(this.checked){
+		new Notification(remote.app.name, { body: '设置开机自启' });
+	}else{
+		new Notification(remote.app.name, { body: '取消开机自启' });
+	}
+});
+openLogin.prop('checked', remote.app.getLoginItemSettings().openAtLogin);
+
+let alwaysTop = $('.alwaysTop').on('click', function(){
+	ipcRenderer.send('alwaysOnTop', this.checked);
+	if(this.checked){
+		store.set('alwaysOnTop', 1);
+		new Notification(remote.app.name, { body: '设置置顶成功' });
+	}else{
+		store.delete('alwaysOnTop');
+		new Notification(remote.app.name, { body: '取消置顶成功' });
+	}
+});
+let alwaysOnTop = store.get('alwaysOnTop');
+if(!!alwaysOnTop)alwaysTop.prop('checked', true);
+
+$('.devTools').on('click', function(){
+	ipcRenderer.send('toggleDevTools');
+});
+
+let dark = $('.dark').on('click', function(){
+	ipcRenderer.send('useDarkColors', this.checked);
+	if(this.checked){
+		store.set('useDarkColors', 1);
+	}else{
+		store.delete('useDarkColors');
+	}
+});
+let useDarkColors = store.get('useDarkColors');
+if(!!useDarkColors)dark.prop('checked', true);
+
+$('li.devTools').on('click', () => {
+	ipcRenderer.send('toggleDevTools');
+	ipcRenderer.send('hideMenubar');
+});
+$('li.html').on('click', () => {
+	ipcRenderer.send('copyHtmlAct');
+	ipcRenderer.send('hideMenubar');
+});
+$('li.preferences').on('click', () => {
+	ipcRenderer.send('openPreferences');
+	ipcRenderer.send('hideMenubar');
+});
+$('li.update').on('click', () => {
+	ipcRenderer.send('checkForUpdate');
+	ipcRenderer.send('hideMenubar');
+});
+$('li.quit').on('click', () => {
+	remote.app.quit();
+});
+</script>

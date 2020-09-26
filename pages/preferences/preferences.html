@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=320,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0,user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="email=no">
+<meta name="format-detection" content="address=no">
+<title>偏好设置</title>
+<link type="text/css" href="preferences.css" rel="stylesheet">
+</head>
+
+<body>
+<h1></h1>
+<div class="tabs-header">
+	<div class="li this"><i></i>通用设置</div>
+	<div class="li"><i></i>关于</div>
+</div>
+<div class="tabs-view">
+	<div class="li hidden">
+		<ul>
+			<li>
+				<div>
+					<i>* 需重启</i>
+					<span>设置平台</span>
+					<select class="platform-list">
+						<option value="">程序默认</option>
+						<option value="Win32">Windows</option>
+						<option value="MacIntel">Mac</option>
+						<option value="Linux">Linux</option>
+						<option value="X11">X11</option>
+						<option value="iPhone">iPhone</option>
+						<option value="iPad">iPad</option>
+						<option value="Android">Android</option>
+					</select>
+				</div>
+				<em class="platform"><span>当前平台</span><input type="text" spellcheck="false" /></em>
+			</li>
+			<li>
+				<div>
+					<i>* 需重启</i>
+					<span>设置代理</span>
+					<select class="useragent-list">
+						<option value="">程序默认</option>
+						<option value="Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/7.0.8(0x17000820) NetType/WIFI Language/zh_CN">Wechat</option>
+						<option value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11) AppleWebKit/601.1.27 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/601.1.27">Chrome on Mac</option>
+						<option value="Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36">Chrome on Windows</option>
+						<option value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:41.0) Gecko/20100101 Firefox/41.0">Firefox on Mac</option>
+						<option value="Mozilla/5.0 (Windows NT 6.3; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0">Firefox on Windows</option>
+						<option value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11) AppleWebKit/601.1.27 (KHTML, like Gecko) Version/8.1 Safari/601.1.27">Safari on Mac</option>
+						<option value="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27">Safari on Windows</option>
+						<option value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2376.0 Safari/537.36 OPR/31.0.1857.0">Opera on Mac</option>
+						<option value="Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.73 Safari/537.36 OPR/34.0.2036.25">Opera on Windows</option>
+						<option value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586">Microsoft Edge</option>
+						<option value="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko">Internet Explorer 11</option>
+						<option value="Mozilla/5.0 (compatible; WOW64; MSIE 10.0; Windows NT 6.2)">Internet Explorer 10</option>
+						<option value="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)">Internet Explorer 9</option>
+						<option value="Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)">Internet Explorer 8</option>
+						<option value="Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)">Internet Explorer 7</option>
+						<option value="Mozilla/4.0 (Windows; MSIE 6.0; Windows NT 5.2)">Internet Explorer 6</option>
+					</select>
+				</div>
+				<em class="useragent"><span>当前代理</span><textarea spellcheck="false"></textarea></em>
+				<em><strong>{name} 将替换为APP名称，{version} 将替换为APP版本号</strong></em>
+			</li>
+			<li>
+				<div>
+					<i>可自行拖动大小</i>
+					<span>窗口大小</span>
+					<select class="size-list">
+						<option value="">程序默认</option>
+						<option value="320*568">iPhone 5/SE</option>
+						<option value="375*667">iPhone 6/7/8</option>
+						<option value="414*736">iPhone 6/7/8 Plus</option>
+						<option value="375*812">iPhone X</option>
+						<option value="1024*768">iPad</option>
+						<option value="1366*1024">iPad Pro</option>
+						<option value="360*640">Galaxy S5</option>
+						<option value="800*1280">Nexus 10</option>
+					</select>
+					<h5>当前大小<input type="text" class="width" spellcheck="false" /> * <input type="text" class="height" spellcheck="false" /></h5>
+				</div>
+			</li>
+			<li>
+				<font>
+					开机自启
+					<label class="checkbox-app"><input type="checkbox" class="openLogin" /><b></b></label>
+				</font>
+				<font>
+					窗口置顶
+					<label class="checkbox-app"><input type="checkbox" class="alwaysTop" /><b></b></label>
+				</font>
+				<font>
+					默认启动开发者
+					<label class="checkbox-app"><input type="checkbox" class="devTools" /><b></b></label>
+				</font>
+				<font>
+					暗黑模式
+					<label class="checkbox-app"><input type="checkbox" class="dark" /><b></b></label>
+				</font>
+			</li>
+			<li>
+				<input type="button" value="立即重启" class="relaunch" />
+			</li>
+		</ul>
+	</div>
+	<div class="li about hidden">
+		<div>
+			<i></i>
+			<strong></strong>
+			<span></span>
+		</div>
+	</div>
+</div>
+<!--<div>
+	<input type="button" class="close" value="关闭" />
+</div>-->
+</body>
+</html>
+<script>
+require('./preferences')
+</script>

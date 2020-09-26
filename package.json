@@ -1,0 +1,57 @@
+{
+	"name": "NanoBrowser",
+	"version": "1.2.2",
+	"description": "A custom platform/userAgent mini web browser desktop app",
+	"main": "index.js",
+	"scripts": {
+		"start": "electron ."
+	},
+	"author": "MARIOᴾᴿᴼ",
+	"copyright": "NanoBrowser developed by MARIOᴾᴿᴼ",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ajsong/nanobrowser.git"
+	},
+	"build": {
+		"productName": "NanoBrowser",
+		"appId": "com.laokema.nanobrowser",
+		"publish": [
+			{
+				"provider": "generic",
+				"url": ""
+			}
+		],
+		"mac": {
+			"icon": "assets/icons/icon.icns"
+		},
+		"win": {
+			"icon": "assets/icons/icon.ico"
+		},
+		"linux": {
+			"icon": "assets/icons/icon"
+		}
+	},
+	"nsis": {
+		"oneClick": false,
+		"perMachine": false,
+		"allowElevation": true,
+		"allowToChangeInstallationDirectory": true,
+		"installerIcon": "assets/icons/icon.ico",
+		"uninstallerIcon": "assets/icons/icon.ico",
+		"installerHeaderIcon": "assets/icons/icon.ico",
+		"createDesktopShortcut": true,
+		"createStartMenuShortcut": true
+	},
+	"dependencies": {
+		"electron-localshortcut": "^3.2.1",
+		"electron-store": "^6.0.0",
+		"electron-updater": "^4.3.5",
+		"menubar": "^9.0.1"
+	},
+	"devDependencies": {
+		"electron": "10.1.2",
+		"electron-builder": "^22.8.1",
+		"electron-reloader": "^1.0.1"
+	}
+}
