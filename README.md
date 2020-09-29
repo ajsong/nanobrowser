@@ -10,11 +10,13 @@
 
 ## Features
 
-- **Custom window.navigator.platform**
-- **Custom window.navigator.userAgent**
-- Update online.
-- Auto/Manual Dark Mode Theme.
-- Dock menu (macOS).
+- [x] **Custom window.navigator.platform**
+- [x] **Custom window.navigator.userAgent**
+- [x] Update online.
+- [x] Auto/manual dark mode theme.
+- [x] Dock menu (macOS).
+- [x] Toggle auto hide (macOS) (Windows/Linux have no animation).
+- [ ] Custom drag size (macOS have some bug).
 
 ## How To Use
 
