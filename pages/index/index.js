@@ -16,21 +16,22 @@ if(currentPlatform.length){
 	});
 }
 
-if(!isMac)$('body').addClass('nonMac');
+if(!isMac){
+	$('body').addClass('nonMac');
+	ipcRenderer.send('devicePixelRatio', window.devicePixelRatio);
+}
 
-let b = $('.view div b'), url = $('.view font input'), placeholder = $('.view font i'), webview = $('webview')//, label = $('.view label'), iframe = $('iframe');
-let start = 'file://' + path.join(__dirname, 'start.html');
+let strong = $('.view strong'), b = $('.view div b'), url = $('.view font input'), placeholder = $('.view font i'), webview = $('webview'), isMouseDown = false;
 let updateUrl = (res) => {
 	url.val(res);
 	placeholder.html(res);
 };
 
-$('.view strong').html((isMac?'':'<i></i><i></i>') + remote.app.getName());
+strong.html((isMac?'':'<i></i><i></i>') + remote.app.getName());
 $('.view strong i:eq(0)').on('click', () => remote.getCurrentWindow().close());
 $('.view strong i:eq(1)').on('click', () => remote.getCurrentWindow().minimize());
 
 webview.attr('useragent', window.navigator.userAgent);
-webview.attr('src', start);
 webview[0].addEventListener('did-finish-load', function(res){
 	b.eq(2).removeClass('reload');
 });
@@ -42,6 +43,29 @@ webview[0].addEventListener('did-fail-load', function(res){
 });
 webview[0].addEventListener('did-navigate-in-page', function(res){
 	updateUrl(res.url);
+});
+
+function setAutoHide(){
+	$(document.body).on('mousedown', () =>{
+		console.log('mousedown')
+		isMouseDown = true;
+	}).on('mouseup', () =>{
+		console.log('mouseup')
+		isMouseDown = false;
+	}).on('mouseover', () => ipcRenderer.send('mouseover')).on('mouseleave', () =>{
+		if(!isMouseDown)ipcRenderer.send('mouseleave');
+	});
+	strong.on('mouseup', () => ipcRenderer.send('windowMove'));
+}
+let autoHideSide = store.get('autoHideSide') || 0;
+if(isMac && (typeof store.get('autoHideSide') === 'undefined' || autoHideSide === 1))setAutoHide();
+ipcRenderer.on('setAutoHide', (e, arg) => {
+	if(arg){
+		setAutoHide();
+	}else{
+		$(document.body).off('mousedown').off('mouseup').off('mouseover').off('mouseleave');
+		strong.off('mouseup');
+	}
 });
 
 b.on('click', function(){
@@ -79,20 +103,6 @@ placeholder.on('mousedown', function(){
 	}, 300);
 });
 
-/*label.on('mousedown', function(){
-	remote.getCurrentWebContents().toggleDevTools();
-});*/
-
-ipcRenderer.on('alwaysOnTop', (e, arg) => {
-	let win = remote.getCurrentWindow();
-	win.setAlwaysOnTop(arg);
-	if(arg){
-		store.set('alwaysOnTop', 1);
-	}else{
-		store.delete('alwaysOnTop');
-	}
-});
-
 ipcRenderer.on('copyHtml', (e, arg) => {
 	webview[0].executeJavaScript('document.body.parentNode.outerHTML').then((res) => {
 		clipboard.writeText(res);
@@ -111,8 +121,7 @@ ipcRenderer.on('message', (e, arg) => {
 		}else if(arg.type === 'update-not-available'){
 			coo.overloadSuccess(arg.msg);
 		}else if(arg.type === 'error'){
-			console.log(arg.type);
-			console.log(arg.msg);
+			console.log(arg.type, arg.msg);
 			coo.overloadError(arg.msg);
 		}else if(typeof arg.msg !== 'undefined'){
 			coo.overload(arg.msg);

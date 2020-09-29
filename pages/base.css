@@ -22,6 +22,13 @@ ul{list-style:none;}
 .checkbox-app input:checked + *{background:#419bf9;}
 .checkbox-app input:checked + *:after{-webkit-transform:translate3d(16px,0,0); transform:translate3d(16px,0,0);}/*.checkbox-app>*(width-height)*/
 .checkbox-app input:disabled + *{background:#f1f1f1;}
+@media (prefers-color-scheme: dark) {
+.checkbox-app > *{background:#666;}
+.checkbox-app > *:before{background:#242424;}
+.checkbox-app > *:after{background:#ccc;}
+.checkbox-app input:disabled + *{background:#555;}
+.checkbox-app input:disabled + *:after{background:#666;}
+}
 
 /* 提示框 */
 .load-overlay{position:fixed; left:0; top:0; z-index:998; width:100%; height:100%; overflow:hidden; text-align:center; opacity:0; -webkit-transition:opacity 200ms ease-out; transition:opacity 200ms ease-out; -webkit-backface-visibility:hidden; backface-visibility:hidden; -webkit-transform-style:preserve-3d; transform-style:preserve-3d;}

@@ -1,19 +1,22 @@
-//Developed by @mario v1.0.20200924
-const { app, BrowserWindow, screen, ipcMain, Menu, shell, TouchBar, nativeTheme, dialog, Tray, net } = require('electron');
+//Developed by @mario v1.0.20200928
+const { app, BrowserWindow, screen, ipcMain, Menu, shell, TouchBar, nativeTheme, dialog, Tray, net, globalShortcut } = require('electron');
 const { TouchBarLabel, TouchBarButton, TouchBarSpacer } = TouchBar;
 const path = require('path');
 const Store = require('electron-store');
 const { autoUpdater } = require('electron-updater');
-//const localshortcut = require('electron-localshortcut');
 const { menubar } = require('menubar');
+const json = require('./package.json');
+//const localshortcut = require('electron-localshortcut');
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 if(!app.isPackaged)require('electron-reloader')(module, {});
 let store = new Store();
 let isMac = process.platform === 'darwin';
-let feedUrl = 'https://www.laokema.com/desktop';
-//let tray = null;
 let win = null;
+let prefWin = null;
+let trayWin = null;
 let devtools = null;
+let devicePixelRatio = 1; //兼容非macOS的视网膜屏
+let feedUrl = 'https://www.laokema.com/desktop';
 
 //只启动一个实例
 let gotTheLock = app.requestSingleInstanceLock();
@@ -22,24 +25,35 @@ if(!gotTheLock){
 }else{
 	app.on('second-instance', (event, commandLine, workingDirectory) => {
 		//当运行第二个实例时,将会聚焦到myWindow这个窗口
-		if (win) {
+		if(win){
 			if (win.isMinimized()) win.restore();
 			win.focus();
 		}
 	});
 	
 	nativeTheme.themeSource = nativeTheme.shouldUseDarkColors ? 'dark' : 'system';
+	app.setAsDefaultProtocolClient(json.name.toLowerCase());
+	app.setAboutPanelOptions({
+		applicationName: json.name,
+		applicationVersion: json.version,
+		copyright: json.copyright,
+		authors: json.author,
+		website: json.repository.url,
+		iconPath: path.join(__dirname, 'assets', 'icons', 'icon', '128x128.png') //为兼容所有平台路径分割符
+	});
 	
 	app.whenReady().then(() => {
+		let isMoveShow = false;
 		let { width, height } = screen.getPrimaryDisplay().workAreaSize;
 		win = new BrowserWindow({
-			x: width - 320 - 20,
+			x: width - 320,
 			y: Math.floor((height - 568) / 2),
 			width: 320,
 			height: 568,
 			minWidth: 320,
 			minHeight: 568,
 			useContentSize: true,
+			alwaysOnTop: true,
 			show: false,
 			maximizable: false,
 			titleBarStyle: 'hidden',
@@ -50,6 +64,8 @@ if(!gotTheLock){
 				nodeIntegration: true,
 				enableRemoteModule: true,
 				webviewTag: true,
+				//webSecurity: false,
+				//allowRunningInsecureContent: true,
 				//devTools: false
 			},
 		});
@@ -67,10 +83,11 @@ if(!gotTheLock){
 		win.on('page-title-updated', (e, cmd) => {
 			e.preventDefault();
 		});
-		win.on('resize', () => {
-			let s = win.getSize();
-			win.setPosition(width - s[0] - 20, Math.floor((height - s[1]) / 2), true);
-			store.set('currentWindowSize', s[0]+'*'+s[1]);
+		win.on('will-resize', (e, newBounds) => {
+			let newWidth = Math.floor(newBounds.width/devicePixelRatio), newHeight = Math.floor(newBounds.height/devicePixelRatio);
+			win.setPosition(width - newWidth, Math.floor((height - newHeight) / 2));
+			store.set('currentWindowSize', newWidth+'*'+newHeight);
+			if(prefWin)prefWin.webContents.send('getWindowSize', { width: newWidth, height: newHeight });
 		});
 		win.on('blur', () => {
 			win.webContents.send('windowBlur');
@@ -81,8 +98,8 @@ if(!gotTheLock){
 		win.on('closed', () => {
 			app.quit();
 		});
-		/*//点击关闭按钮，退出任务栏，最小化到托盘
-		win.on('closed', () => {
+		//点击关闭按钮，退出任务栏，最小化到托盘
+		/*win.on('closed', () => {
 			win = null;
 		});
 		win.on('close', (e) => {
@@ -110,13 +127,16 @@ if(!gotTheLock){
 				detail: 'HTML代码已复制至剪切板'
 			});
 		});
+		ipcMain.on('devicePixelRatio', (e, arg) => {
+			devicePixelRatio = arg;
+		});
 		
 		let toggleDevTools = function(w){
 			if(isMac){
 				w.webContents.toggleDevTools();
 			}else{
 				if(!devtools){
-					devtools = new BrowserWindow({ title: 'Developer Tools', height: 280, parent: w });
+					devtools = new BrowserWindow({ title: 'Developer Tools', height: 280 });
 					devtools.menuBarVisible = false;
 					w.webContents.setDevToolsWebContents(devtools.webContents);
 					w.webContents.openDevTools({ mode: 'detach' });
@@ -127,13 +147,17 @@ if(!gotTheLock){
 			}
 		};
 		
-		let subwin = null;
-		let openPreferences = (e) => {
-			subwin = new BrowserWindow({
+		let openPreferences = function(e){
+			if (prefWin) {
+				if (prefWin.isMinimized()) prefWin.restore();
+				prefWin.focus();
+				return;
+			}
+			prefWin = new BrowserWindow({
 				width: 600,
 				height: 400,
 				useContentSize: true,
-				parent: win,
+				//parent: win,
 				//modal: true,
 				title: '偏好设置',
 				resizable: false,
@@ -148,22 +172,25 @@ if(!gotTheLock){
 					//devTools: false
 				}
 			});
-			subwin.loadFile('pages/preferences/preferences.html');
-			subwin.once('ready-to-show', () => {
-				subwin.show();
+			prefWin.loadFile('pages/preferences/preferences.html');
+			prefWin.once('ready-to-show', () => {
+				prefWin.show();
 			});
-			subwin.on('blur', () => {
-				subwin.webContents.send('windowBlur');
+			prefWin.on('blur', () => {
+				prefWin.webContents.send('windowBlur');
 			});
-			subwin.on('focus', () => {
-				subwin.webContents.send('windowFocus');
+			prefWin.on('focus', () => {
+				prefWin.webContents.send('windowFocus');
 			});
-			subwin.menuBarVisible = false;
-			//toggleDevTools(subwin);
+			prefWin.on('closed', () => {
+				prefWin = null;
+			});
+			prefWin.menuBarVisible = false;
+			//toggleDevTools(prefWin);
 		};
 		ipcMain.on('openPreferences', openPreferences);
 		ipcMain.on('changeHeight', (e, arg) => {
-			subwin.setBounds({ height:arg }, true);
+			prefWin.setBounds({ height:arg }, true);
 		});
 		
 		/*localshortcut.register(win, 'CommandOrControl+,', () => {
@@ -177,14 +204,6 @@ if(!gotTheLock){
 			app.setLoginItemSettings({
 				openAtLogin: arg
 			});
-		});
-		
-		let alwaysOnTop = store.get('alwaysOnTop') || 0;
-		if(alwaysOnTop === 1){
-			win.setAlwaysOnTop(!!alwaysOnTop);
-		}
-		ipcMain.on('alwaysOnTop', (e, arg) => {
-			win.webContents.send('alwaysOnTop', arg);
 		});
 		
 		let defaultOpenDevTools = store.get('defaultOpenDevTools') || 0;
@@ -205,25 +224,80 @@ if(!gotTheLock){
 		if(size.length){
 			let s = size.split('*'), w = Number(s[0]), h = Number(s[1]);
 			win.setSize(w, h);
-			win.setPosition(width - w - 20, Math.floor((height - h) / 2));
+			win.setPosition(width - w, Math.floor((height - h) / 2));
 		}
 		ipcMain.on('setWindowSize', (e, arg) => {
 			let s = arg.split('*'), w = Number(s[0]), h = Number(s[1]);
 			win.setSize(w, h, true);
 			setTimeout(() => {
-				let size = win.getSize();
-				win.setPosition(width - size[0] - 20, Math.floor((height - size[1]) / 2), true);
+				let size = win.getContentBounds();
+				win.setPosition(width - size.width, Math.floor((height - size.height) / 2), true);
 			}, 250);
 		});
 		ipcMain.on('getWindowSize', e => {
-			let size = win.getSize();
+			let size = win.getContentBounds();
 			e.sender.send('getWindowSize', size);
 		});
 		
-		/*setTimeout(() => {
-			let size = win.getSize();
-			win.setPosition(width, Math.floor((height - size[1]) / 2), true);
-		}, 3000);*/
+		let autoHideSide = store.get('autoHideSide') || 0;
+		function setAutoHide(arg){
+			let size = win.getContentBounds();
+			isMoveShow = true;
+			win.webContents.send('setAutoHide', arg);
+			if(prefWin)prefWin.webContents.send('setAutoHide', arg);
+			if(trayWin)trayWin.webContents.send('setAutoHide', arg);
+			if(arg){
+				autoHideSide = 1;
+				store.set('autoHideSide', 1);
+				setTimeout(() => win.shadow = false, 200);
+				win.setPosition(width - 1, Math.floor((height - size.height) / 2), true);
+				autoHide.label = '取消隐藏';
+			}else{
+				autoHideSide = 0;
+				store.set('autoHideSide', 0);
+				win.shadow = true;
+				win.setPosition(width - size.width, Math.floor((height - size.height) / 2), true);
+				autoHide.label = '自动隐藏';
+			}
+			setTimeout(() => isMoveShow = false, 300);
+		}
+		if(typeof store.get('autoHideSide') === 'undefined'){
+			store.set('autoHideSide', 1);
+			autoHideSide = 1;
+		}
+		if(!isMac){
+			store.set('autoHideSide', 0);
+			autoHideSide = 0;
+		}
+		if(autoHideSide === 0)win.webContents.send('setAutoHide', false);
+		ipcMain.on('setAutoHide', function(e, arg){
+			setAutoHide(arg);
+		});
+		let isAutoHideSide = autoHideSide === 1;
+		
+		ipcMain.on('mouseover', (e) => {
+			let size = win.getContentBounds();
+			isMoveShow = true;
+			win.shadow = true;
+			win.setPosition(width - size.width, Math.floor((height - size.height) / 2), true);
+			setTimeout(() => isMoveShow = false, 300);
+		});
+		ipcMain.on('mouseleave', (e) => {
+			let size = win.getContentBounds();
+			isMoveShow = true;
+			setTimeout(() => win.shadow = false, 200);
+			win.setPosition(width - 1, Math.floor((height - size.height) / 2), true);
+			setTimeout(() => isMoveShow = false, 300);
+		});
+		ipcMain.on('windowMove', () => {
+			let size = win.getContentBounds();
+			win.setPosition(width - size.width, Math.floor((height - size.height) / 2), true);
+		});
+		
+		/*globalShortcut.register('CmdOrCtrl+N', () => {
+			let size = win.getContentBounds();
+			console.log(size);
+		});*/
 		
 		//菜单栏
 		let template = [
@@ -340,18 +414,17 @@ if(!gotTheLock){
 				toggleDevTools(win);
 			}
 		});
-		let isAlwaysOnTop = alwaysOnTop === 1;
-		let alwaysTop = new TouchBarButton({
-			label: isAlwaysOnTop ? '取消置顶' : '窗口置顶',
+		let autoHide = new TouchBarButton({
+			label: isAutoHideSide ? '取消隐藏' : '自动隐藏',
 			click: () => {
-				isAlwaysOnTop = !isAlwaysOnTop;
-				win.setAlwaysOnTop(isAlwaysOnTop);
-				if(isAlwaysOnTop){
-					store.set('alwaysOnTop', 1);
-					alwaysTop.label = '取消置顶';
+				isAutoHideSide = !isAutoHideSide;
+				setAutoHide(isAutoHideSide);
+				if(isAutoHideSide){
+					store.set('autoHideSide', 1);
+					autoHide.label = '取消隐藏';
 				}else{
-					store.delete('alwaysOnTop');
-					alwaysTop.label = '窗口置顶';
+					store.set('autoHideSide', 0);
+					autoHide.label = '自动隐藏';
 				}
 			}
 		});
@@ -405,7 +478,7 @@ if(!gotTheLock){
 		let touchBar = new TouchBar({
 			items: [
 				devTools,
-				alwaysTop,
+				autoHide,
 				new TouchBarSpacer({ size: 'large' }),
 				spin,
 				new TouchBarSpacer({ size: 'small' }),
@@ -421,16 +494,15 @@ if(!gotTheLock){
 		win.setTouchBar(touchBar);
 	
 		//系统托盘
-		/*tray = new Tray(path.join(__dirname, 'assets', 'icons', 'icon', 'tray.png')); //为兼容所有平台路径分割符
+		/*tray = new Tray(path.join(__dirname, 'assets', 'icons', 'icon', 'tray.png'));
 		let contextMenu = Menu.buildFromTemplate([
 			{
-				label: alwaysOnTop === 1 ? '取消置顶' : '窗口置顶',
+				label: autoHideSide === 1 ? '取消隐藏' : '自动隐藏',
 				click: function(item, focusedWindow){
-					alwaysOnTop === 1 ? store.delete('alwaysOnTop') : store.set('alwaysOnTop', 1);
-					contextMenu.items[0].label = alwaysOnTop === 1 ? '窗口置顶' : '取消置顶';
-					alwaysOnTop = !alwaysOnTop;
+					autoHideSide === 1 ? store.delete('autoHideSide') : store.set('autoHideSide', 1);
+					contextMenu.items[0].label = autoHideSide === 1 ? '自动隐藏' : '取消隐藏';
+					autoHideSide = !autoHideSide;
 					tray.setContextMenu(contextMenu);
-					win.setAlwaysOnTop(alwaysOnTop);
 				}
 			},
 			{
@@ -453,31 +525,31 @@ if(!gotTheLock){
 			index: 'file://' + path.join(__dirname, 'pages', 'index', 'tray.html'),
 			icon: path.join(__dirname, 'assets', 'icons', 'icon', iconName),
 			showDockIcon: true,
-			//showOnRightClick: true,
+			//showOnRightClick: !isMac,
 			preloadWindow: true,
 			browserWindow: {
 				width: 170,
-				height: 201,
+				height: 220,
 				useContentSize: true,
-				parent: win,
+				//parent: win,
 				resizable: false,
 				minimizable: false,
 				maximizable: false,
-				//alwaysOnTop: true,
+				alwaysOnTop: true,
 				webPreferences: {
 					nodeIntegration: true,
 					enableRemoteModule: true
 				}
 			}
 		});
-		/*mb.on('right-click', () => mb.showWindow());
-		mb.on('after-create-window', () => mb.window.openDevTools({ mode: 'detach' }))*/
-		ipcMain.on('hideMenubar', (e, arg) => {
-			mb.hideWindow();
+		mb.on('focus-lost', () => mb.hideWindow());
+		mb.on('right-click', () => mb.showWindow());
+		mb.on('after-create-window', () => {
+			trayWin = mb.window;
+			//mb.window.openDevTools({ mode: 'detach' });
 		});
-		ipcMain.on('toggleDevTools', (e, arg) => {
-			toggleDevTools(win);
-		});
+		ipcMain.on('hideMenubar', () => mb.hideWindow());
+		ipcMain.on('toggleDevTools', () => toggleDevTools(win));
 		
 		//检查更新
 		//通过主进程发送事件给渲染进程提示更新信息
@@ -589,7 +661,7 @@ if(!gotTheLock){
 				}
 			}
 		]);
-		app.dock.setMenu(dockTemplate);
+		if(isMac)app.dock.setMenu(dockTemplate);
 		
 		/*dock弹跳
 		let dockId = app.dock.bounce();

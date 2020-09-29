@@ -78,9 +78,6 @@ li div i{color:#666;}
 li div h5 input{color:#eee; background-color:#262626; border:1px solid #4c4c4c;}
 li em input, li em textarea{color:#eee; background-color:#262626; border:1px solid #4c4c4c;}
 li strong{color:#666;}
-.checkbox-app > *{background:#666;}
-.checkbox-app > *:before{background:#242424;}
-.checkbox-app > *:after{background:#ccc;}
 
 .nonMac h1 i{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg%20viewBox%3D%220%200%201024%201024%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M995.104%2074.048l-440.064%20440.256%20427.872%20430.848c16.352%2016.448%2019.744%2039.712%207.616%2051.968s-35.232%208.8-51.584-7.648l-428.032-430.976-436.48%20436.672c-16.544%2016.544-39.936%2019.968-52.224%207.68s-8.864-35.68%207.68-52.224l436.64-436.8-437.216-440.256c-16.352-16.448-19.744-39.712-7.616-51.968s35.264-8.832%2051.584%207.648l437.376%20440.384%20439.904-440.096c16.544-16.544%2039.936-19.968%2052.224-7.68s8.864%2035.68-7.68%2052.224z%22%20fill%3D%22%23ffffff%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");}
 

@@ -1,6 +1,6 @@
 {
 	"name": "NanoBrowser",
-	"version": "1.2.2",
+	"version": "1.3.0",
 	"description": "A custom platform/userAgent mini web browser desktop app",
 	"main": "index.js",
 	"scripts": {

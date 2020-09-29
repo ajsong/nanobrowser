@@ -86,8 +86,8 @@ sizeList.on('change', function(){
 if(!hasSize && size !== '320*568')sizeList.append('<option value="'+width.val()+'*'+height.val()+'" selected>自定义大小</option>');
 ipcRenderer.send('getWindowSize');
 ipcRenderer.on('getWindowSize', (e, arg) => {
-	width.val(arg[0]);
-	height.val(arg[1]);
+	width.val(arg.width);
+	height.val(arg.height);
 });
 width.on('blur', function(){
 	let widthVal = $(this).val(), heightVal = height.val();
@@ -118,26 +118,26 @@ let openLogin = $('.openLogin').on('click', function(){
 });
 openLogin.prop('checked', remote.app.getLoginItemSettings().openAtLogin);
 
-let alwaysTop = $('.alwaysTop').on('click', function(){
-	ipcRenderer.send('alwaysOnTop', this.checked);
+let autoHide = $('.autoHide').on('click', function(){
+	ipcRenderer.send('setAutoHide', this.checked);
 	if(this.checked){
-		store.set('alwaysOnTop', 1);
-		new Notification(remote.app.name, { body: '设置置顶成功' });
+		store.set('autoHideSide', 1);
 	}else{
-		store.delete('alwaysOnTop');
-		new Notification(remote.app.name, { body: '取消置顶成功' });
+		store.set('autoHideSide', 0);
 	}
 });
-let alwaysOnTop = store.get('alwaysOnTop');
-if(!!alwaysOnTop)alwaysTop.prop('checked', true);
+let autoHideSide = store.get('autoHideSide');
+if(!!autoHideSide)autoHide.prop('checked', true);
+if(!isMac)autoHide.prop('disabled', true);
+ipcRenderer.on('setAutoHide', (e, arg) => {
+	autoHide.prop('checked', arg);
+});
 
 let devTools = $('.devTools').on('click', function(){
 	if(this.checked){
 		store.set('defaultOpenDevTools', 1);
-		new Notification(remote.app.name, { body: '设置默认启动开发者工具' });
 	}else{
 		store.delete('defaultOpenDevTools');
-		new Notification(remote.app.name, { body: '取消默认启动开发者工具' });
 	}
 });
 let defaultOpenDevTools = store.get('defaultOpenDevTools');
@@ -158,12 +158,6 @@ $('.relaunch').on('click', () => {
 	remote.app.relaunch();
 	remote.app.quit();
 });
-
-/*
-$('.close').on('click', () => {
-	remote.getCurrentWindow().close();
-});
-*/
 
 $('.about strong').html(remote.app.getName());
 $('.about span').html('当前版本：' + remote.app.getVersion());
