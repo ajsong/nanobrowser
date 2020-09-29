@@ -15,7 +15,7 @@
 - [x] Update online.
 - [x] Auto/manual dark mode theme.
 - [x] Dock menu (macOS).
-- [x] Toggle auto hide (macOS) (Windows/Linux have no animation).
+- [x] Toggle auto hide (macOS) (Windows/Linux have no animation and frame border bug).
 - [ ] Custom drag size (macOS have some bug).
 
 ## How To Use
