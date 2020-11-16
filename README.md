@@ -35,3 +35,5 @@ npm install && npm start
 #### License [MIT](LICENSE)
 
 *NanoBrowser* is published under the MIT license. See `LICENSE` for details.
+
+[![LATOPAY](https://latopay.com/w/pz-bar-20714.png)](https://latopay.com/@ajsong)
