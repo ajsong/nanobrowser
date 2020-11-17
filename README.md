@@ -4,9 +4,13 @@
 
 *A custom platform/userAgent mini web browser desktop app on macOS, Windows and Linux. Built with [Electron](https://github.com/atom/electron).*
 
-[![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ajsong/nanobrowser.svg?style=social&label=Star)]()
 [![GitHub watchers](https://img.shields.io/github/watchers/ajsong/nanobrowser.svg?style=social&label=Watch)]()
+
+<img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/ajsong/nanobrowser/total?style=for-the-badge">
+<img alt="GitHub release (latest by date including pre-releases)" src="https://img.shields.io/github/v/release/ajsong/nanobrowser?include_prereleases&style=for-the-badge">
+<img alt="GitHub" src="https://img.shields.io/github/license/ajsong/nanobrowser?style=for-the-badge">
+<img src="https://img.shields.io/github/workflow/status/ajsong/nanobrowser/release-build?style=for-the-badge">
 
 ## Features
 
